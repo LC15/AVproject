@@ -33,8 +33,22 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import pigpio
+#import pigpio
 
-if __name__ == '__main__':
-    pi = pigpio.pi()
-    img = cv2.VideoCapture(0)
+#if __name__ == '__main__':
+    #pi = pigpio.pi()
+
+useless_frames = 10
+camera = cv2.VideoCapture(0)
+def get_image():
+    retval, img = camera.read()
+    return img
+for i in range(useless_frames):
+    temp = get_image()
+    print("Hold up homie, I'm taking images rn...")
+camera_capture = get_image()
+cv2.imwrite('/Users/SirenaSarena/Desktop/AVproject/testimage.jpg', camera_capture)
+            # ^ this is the path in which you want to save you photo.
+            #your path will be different depending on what
+            # folder you are working in
+del(camera)
