@@ -37,17 +37,28 @@ import matplotlib.pyplot as plt
 #if __name__ == '__main__':
     #pi = pigpio.pi()
 
+# capture a photo
 useless_frames = 10
 camera = cv2.VideoCapture(0)
 def get_image():
     retval, img = camera.read()
     return img
+print("Hold up homie, I'm taking images rn... Say cheese :)")
 for i in range(useless_frames):
     temp = get_image()
-    print("Hold up homie, I'm taking images rn... Say cheese :)")
 camera_capture = get_image()
-cv2.imwrite('/Users/SirenaSarena/Desktop/AVproject/testimage.jpg', camera_capture)
-            # ^ this is the path in which you want to save your photo.
-            # your path will be different depending on what folder you are
-            # working in. type 'pwd' in your terminal to get your path.
+cv2.imwrite('testimage.jpg', camera_capture)
 del(camera)
+
+# line detection
+camera_capture_grey = cv2.imread('testimage.jpg', 0)
+ret, thresh = cv2.threshold(camera_capture_grey, 127, 255, 0) # light needs to be
+                                                              # pretty good. no shadow. fix?
+camera_capture_grey2, contours, heirarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+# this is just to see the contour lines
+camera_capture_copy = camera_capture.copy()
+cv2.drawContours(camera_capture_copy,contours,-1,(0,255,0))
+cv2.imshow('draw contours', camera_capture_copy)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
