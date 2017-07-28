@@ -37,7 +37,9 @@ import matplotlib.pyplot as plt
 #if __name__ == '__main__':
     #pi = pigpio.pi()
 
-camera = cv2.VideoCapture(0)
+# python function: sorted. sort a list based on criteria
+
+camera = cv2.VideoCapture(1)
 camera.set(cv2.CAP_PROP_FRAME_WIDTH, 500)
 camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 500)
 
@@ -55,9 +57,27 @@ while(True):
     closing_image = cv2.morphologyEx(opening_image, cv2.MORPH_CLOSE, kernel)
     final_image = cv2.bitwise_and(image, image, mask = closing_image)
 
+    # contouring
+    im2, contours, hierarchy = cv2.findContours(closing_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+
+    # finding the largest contour
+    max_area = 0
+    max_contour_value = 0
+    if len(contours) != 0:
+        for i in range(0, len(contours)):
+            max_contour_value = i
+            contour_area = cv2.contourArea(contours[i])
+            if contour_area > max_area:
+                max_area = contour_area
+        print(' i value: ', max_contour_value, ' max_area: ', max_area)
+
+    # just to view what happens throughout the code
     cv2.imshow('original', image)
-    cv2.imshow('filter color', filter_color)
-    cv2.imshow('final image', final_image)
+    # cv2.imshow('hsv filer', hsv_image)
+    # cv2.imshow('filter color', filter_color)
+    # cv2.imshow('final image', final_image)
+    cv2.drawContours(final_image, contours, -1, (0, 255, 0))
+    cv2.imshow('contours', final_image)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
