@@ -4,8 +4,7 @@
 # of the code !!!
 
 # INITIAL POSITION
-# * the camera is only good for getting the initial position. By this, we need
-# a pixel to feet conversion. i'll explain more below.
+# * the camera is only good for getting the initial position.
 
 # STEP 1: perspective change (camera isn't going to be right above)
 # openCV functions:
@@ -45,10 +44,10 @@ def get_image():
     return img
 for i in range(useless_frames):
     temp = get_image()
-    print("Hold up homie, I'm taking images rn...")
+    print("Hold up homie, I'm taking images rn... Say cheese :)")
 camera_capture = get_image()
 cv2.imwrite('/Users/SirenaSarena/Desktop/AVproject/testimage.jpg', camera_capture)
-            # ^ this is the path in which you want to save you photo.
-            #your path will be different depending on what
-            # folder you are working in
+            # ^ this is the path in which you want to save your photo.
+            # your path will be different depending on what folder you are
+            # working in. type 'pwd' in your terminal to get your path.
 del(camera)
