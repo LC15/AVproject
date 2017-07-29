@@ -37,8 +37,6 @@ import matplotlib.pyplot as plt
 #if __name__ == '__main__':
     #pi = pigpio.pi()
 
-# python function: sorted. sort a list based on criteria
-
 upper = np.array([10, 255, 255])
 lower = np.array([0, 128, 64])
 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
@@ -65,17 +63,23 @@ filtered_hsv = cv2.bitwise_and(image, image, mask = closing_image) # try finding
                                                                    # way to smooth the image more
 # contouring
 im2, contours, hierarchy = cv2.findContours(closing_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-
-area_bounds = []
+                                                                   # simple might give us the desired points
+area_bounds = np.array([])
 if len(contours) != 0:
     # finding the largest contour
     sorted_contours = sorted(contours, key = lambda contour: cv2.contourArea(contour))
     area_bounds = sorted_contours[-1]
-    print('area_bounds:', area_bounds)
-final_image = cv2.drawContours(image, area_bounds, -1, (0, 255, 0), 2)
+
+epsilon = 0.1 * cv2.arcLength(area_bounds, True)
+approx_contours = cv2.approxPolyDP(area_bounds, epsilon, True)
+
+print('approx_contours: ')
+for i in range(len(approx_contours)):
+    print(approx_contours[i])
+final_image = cv2.drawContours(image, approx_contours, -1, (0, 255, 0), 2)
 
 # just to view what happens throughout the code
-cv2.imshow('original', image)
+# cv2.imshow('original', image)
 # cv2.imshow('hsv filer', hsv_image)
 # cv2.imshow('filter color', filter_color)
 # cv2.imshow('final image', filtered_hsv)
