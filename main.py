@@ -41,7 +41,6 @@ upper = np.array([10, 255, 255])
 lower = np.array([0, 128, 64])
 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
-# while(True):
 # to take an image from the webcam
 useless_frames = 30
 camera = cv2.VideoCapture(0)
@@ -53,37 +52,50 @@ print("Hold up homie, I'm taking images rn... Say cheese :)")
 for i in range(useless_frames):
     temp = get_image()
 image = get_image()
+# image = cv2.imread('rec4.png')
 
 # filtering the video/photo
 hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 filter_color = cv2.inRange(hsv_image, lower, upper)
 opening_image = cv2.morphologyEx(filter_color, cv2.MORPH_OPEN, kernel)
 closing_image = cv2.morphologyEx(opening_image, cv2.MORPH_CLOSE, kernel)
-filtered_hsv = cv2.bitwise_and(image, image, mask = closing_image) # try finding another
-                                                                   # way to smooth the image more
+filtered_hsv = cv2.bitwise_and(image, image, mask = closing_image)
+
 # contouring
 im2, contours, hierarchy = cv2.findContours(closing_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-                                                                   # simple might give us the desired points
-area_bounds = np.array([])
+
 if len(contours) != 0:
     # finding the largest contour
     sorted_contours = sorted(contours, key = lambda contour: cv2.contourArea(contour))
     area_bounds = sorted_contours[-1]
 
-epsilon = 0.1 * cv2.arcLength(area_bounds, True)
+# to get the four corners
+epsilon = 0.05 * cv2.arcLength(area_bounds, True)
 approx_contours = cv2.approxPolyDP(area_bounds, epsilon, True)
 
-print('approx_contours: ')
-for i in range(len(approx_contours)):
-    print(approx_contours[i])
-final_image = cv2.drawContours(image, approx_contours, -1, (0, 255, 0), 2)
+# to find desired coordinates
+approx_contours = np.array(approx_contours, np.float32)
+(tr, tl, bl, br) = approx_contours
+tr = list(tr[0])
+tl = list(tl[0])
+bl = list(bl[0])
+br = list(br[0])
+
+width_a = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+width_b = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
+max_width = max(int(width_a), int(width_b))
+
+height_a = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+height_b = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
+max_height = max(int(height_a), int(height_b))
+
+desired_contours = np.array([[max_width - 1, 0], [0, 0], [0, max_height - 1], [max_width - 1, max_height - 1]], np.float32)
+transformation = cv2.getPerspectiveTransform(approx_contours, desired_contours)
+final_image = cv2.warpPerspective(image, transformation, (max_width, max_height))
 
 # just to view what happens throughout the code
-# cv2.imshow('original', image)
-# cv2.imshow('hsv filer', hsv_image)
-# cv2.imshow('filter color', filter_color)
-# cv2.imshow('final image', filtered_hsv)
-cv2.imshow('contours', final_image)
+cv2.imshow('original', image)
+cv2.imshow('final image', final_image)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
