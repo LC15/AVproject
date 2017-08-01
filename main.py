@@ -53,6 +53,18 @@ def order_contours(approx_contours):
     ordered_contours[3] = approx_contours[np.argmin(d)]
     return ordered_contours
 
+def find_center(contour):
+    moment = cv2.moments(contour)
+    c_x = int(moment["m10"] / moment["m00"])
+    c_y = int(moment["m01"] / moment["m00"])
+    return c_x, c_y
+
+def conversion(x, y, image_width, image_height, area_width, area_height):
+    x_feet = (x * area_width) / image_width
+    y_feet = (y * area_height) / image_height
+    print("x_feet: ", x_feet)
+    print("y_feet: ", y_feet)
+
 upper_orange = np.array([10, 255, 255])
 lower_orange = np.array([0, 128, 64])
 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
@@ -63,7 +75,7 @@ kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 # for i in range(30):
 #     temp = get_image()
 # original_image = get_image()
-original_image = cv2.imread('wrc1.jpg')
+original_image = cv2.imread('slantview.png')
 
 image2 = filter_bw(original_image, lower_orange, upper_orange, kernel)
 im2, contours, hierarchy = cv2.findContours(image2, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
@@ -73,7 +85,7 @@ rect_area_bounds = sort_contours(contours, -2)
 epsilon = 0.05 * cv2.arcLength(rect_area_bounds, True)
 approx_contours = cv2.approxPolyDP(rect_area_bounds, epsilon, True)
 
-# to find desired coordinates
+# to find desired transformed coordinates
 approx_contours = np.array(approx_contours, np.float32)
 (first, second, third, fourth) = approx_contours
 first = list(first[0])
@@ -81,7 +93,6 @@ second = list(second[0])
 third = list(third[0])
 fourth = list(fourth[0])
 
-#cv2.drawContours(original_image, approx_contours, -1, (0, 255, 0), 3)
 ordered_contours = order_contours(approx_contours)
 
 width_a = np.sqrt(((fourth[0] - first[0]) ** 2) + ((fourth[1] - first[1]) ** 2))
@@ -98,10 +109,29 @@ desired_contours = np.array([[0, 0], [0, max_height - 1], [max_width - 1, max_he
 transformation = cv2.getPerspectiveTransform(ordered_contours, desired_contours)
 warped_image = cv2.warpPerspective(original_image, transformation, (max_width, max_height))
 
+# find the center of the car in terms of feet
+orange_filter_warped = filter_bw(warped_image, lower_orange, upper_orange, kernel)
+orange_filer2, contours, hierarchy = cv2.findContours(orange_filter_warped, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+orange_light_contours = sort_contours(contours, -1) # might have to change this to detect small light
+orange_center_x, orange_center_y = find_center(orange_light_contours)
+
+upper_green = np.array([70, 255, 255])
+lower_green = np.array([50, 100, 100])
+filter_green_bw = filter_bw(warped_image, lower_green, upper_green, kernel)
+green_im, green_contours, hierarchy = cv2.findContours(filter_green_bw, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+green_light_contours = sort_contours(green_contours, 0)
+green_center_x, green_center_y = find_center(green_light_contours)
+
+center_of_car_x = int((orange_center_x + green_center_x) / 2)
+center_of_car_y = int((orange_center_y + green_center_y) / 2)
+
+conversion(center_of_car_x, center_of_car_y, 900, 600, 9, 6)
+
 # just to view start/end results
-resized_original_image = cv2.resize(original_image, (1200, 900))
-resized_warped_image = cv2.resize(warped_image, (1200, 900))
-cv2.imshow('original', resized_original_image)
+# resized_original_image = cv2.resize(original_image, (900, 600))
+# cv2.imshow('original', resized_original_image)
+resized_warped_image = cv2.resize(warped_image, (900, 600))
+# cv2.circle(resized_warped_image, (center_of_car_x, center_of_car_y), 7, (255, 255, 255), -1)
 cv2.imshow('warped image', resized_warped_image)
 
 cv2.waitKey(0)
