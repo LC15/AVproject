@@ -12,15 +12,13 @@ import matplotlib.pyplot as plt
 
 #if __name__ == '__main__':
     #pi = pigpio.pi()
-    
-    
 
 # getting image from the camera
 def get_image():
     retval, img = camera.read()
     return img
 
-# filter the image and return the image with the LED lights
+# filter the image and return a clean black and white image
 def filter_bw(image, lower, upper, kernel):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     filter_color = cv2.inRange(hsv_image, lower, upper)
