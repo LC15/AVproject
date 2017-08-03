@@ -18,7 +18,7 @@ def get_image():
     retval, img = camera.read()
     return img
 
-# filter the image and return a clean black and white image
+# filter and return a clean black and white image
 def filter_bw(image, lower, upper, kernel):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     filter_color = cv2.inRange(hsv_image, lower, upper)
@@ -26,7 +26,9 @@ def filter_bw(image, lower, upper, kernel):
     closing_image = cv2.morphologyEx(opening_image, cv2.MORPH_CLOSE, kernel)
     return closing_image
 
+# sort contours and return desired contour (either smallest or largest)
 def sort_contours(contours, position):
+    area_bounds = 0
     if len(contours) != 0:
         if len(contours) == 1:
             position = 0
@@ -34,6 +36,7 @@ def sort_contours(contours, position):
         area_bounds = sorted_contours[position]
     return area_bounds
 
+# order the (4) contour points: top left, bottom left, bottom right, top right
 def order_contours(approx_contours):
     ordered_contours = np.array(approx_contours, dtype = "float32")
     s = np.array([first[0]+first[1], second[0]+second[1], third[0]+third[1], fourth[0]+fourth[1]])
@@ -55,6 +58,7 @@ def order_contours(approx_contours):
     ordered_contours[3] = approx_contours[np.argmin(d)]
     return ordered_contours
 
+# find the center of the lights
 def find_center(contour):
     moment = cv2.moments(contour)
     c_x = int(moment["m10"] / moment["m00"])
@@ -130,8 +134,8 @@ center_of_car_y = int((orange_center_y + green_center_y) / 2)
 conversion(center_of_car_x, center_of_car_y, 900, 600, 9, 6)
 
 # just to view start/end results
-# resized_original_image = cv2.resize(original_image, (900, 600))
-# cv2.imshow('original', resized_original_image)
+resized_original_image = cv2.resize(original_image, (900, 600))
+cv2.imshow('original', resized_original_image)
 resized_warped_image = cv2.resize(warped_image, (900, 600))
 # cv2.circle(resized_warped_image, (center_of_car_x, center_of_car_y), 7, (255, 255, 255), -1)
 cv2.imshow('warped image', resized_warped_image)
