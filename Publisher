@@ -17,9 +17,9 @@ def test_coro():
     #yield from C.connect('mqtt://104.236.50.136')
     yield from C.connect('mqtt://test.mosquitto.org/')
     tasks = [
-        asyncio.ensure_future(C.publish('a/b', b'TEST MESSAGE WITH QOS_0')),
-        asyncio.ensure_future(C.publish('a/b', b'TEST MESSAGE WITH QOS_1', qos=QOS_1)),
-        asyncio.ensure_future(C.publish('a/b', b'TEST MESSAGE WITH QOS_2', qos=QOS_2)),
+        asyncio.ensure_future(C.publish('Fire', b'TEST MESSAGE WITH QOS_0')),
+        asyncio.ensure_future(C.publish('Fire', b'TEST MESSAGE WITH QOS_1', qos=QOS_1)),
+        asyncio.ensure_future(C.publish('Fire', b'TEST MESSAGE WITH QOS_2', qos=QOS_2)),
     ]
     yield from asyncio.wait(tasks)
     ChannelA = logging.getLogger("ChannelA")
@@ -33,9 +33,9 @@ def test_coro2():
         C = MQTTClient()
         #ret = yield from C.connect('mqtt://104.236.50.136')
         ret = yield from C.connect('mqtt://test.mosquitto.org:1883/')
-        message = yield from C.publish('a/b', b'TEST MESSAGE WITH QOS_0', qos=QOS_0)
-        message = yield from C.publish('a/b', b'TEST MESSAGE WITH QOS_1', qos=QOS_1)
-        message = yield from C.publish('a/b', b'TEST MESSAGE WITH QOS_2', qos=QOS_2)
+        message = yield from C.publish('Fire', b'TEST MESSAGE WITH QOS_0', qos=QOS_0)
+        message = yield from C.publish('Fire', b'TEST MESSAGE WITH QOS_1', qos=QOS_1)
+        message = yield from C.publish('Fire', b'TEST MESSAGE WITH QOS_2', qos=QOS_2)
         #print(message)
         ChannelB = logging.getLogger("ChannelB")
         ChannelB.info("B: messages published")
