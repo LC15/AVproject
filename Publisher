@@ -31,6 +31,7 @@ def test_coro():
 def test_coro2():
     try:
         C = MQTTClient()
+        #ret = yield from C.connect('mqtt://104.236.50.136')
         ret = yield from C.connect('mqtt://test.mosquitto.org:1883/')
         message = yield from C.publish('a/b', b'TEST MESSAGE WITH QOS_0', qos=QOS_0)
         message = yield from C.publish('a/b', b'TEST MESSAGE WITH QOS_1', qos=QOS_1)
